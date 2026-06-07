@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>برنامج trabko المحاسبي المطور - trabko</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+</head>
+<body>
+
+    <div id="loginScreen" class="login-wrapper">
+        <div class="login-box">
+            <h2>trabko</h2>
+            <p>مرحباً بك، يرجى تسجيل الدخول للنظام المحاسبي</p>
+            <div style="text-align: right; margin-bottom: 15px;">
+                <label style="font-weight: bold; color: #1a2b4c; font-size: 13px;">Username:</label>
+                <input type="text" id="username" placeholder="أدخل اسم المستخدم">
+            </div>
+            <div style="text-align: right; margin-bottom: 20px;">
+                <label style="font-weight: bold; color: #1a2b4c; font-size: 13px;">Password:</label>
+                <input type="password" id="password" placeholder="أدخل كلمة المرور">
+            </div>
+            <button onclick="checkLogin()">تسجيل الدخول</button>
+        </div>
+    </div>
+
+    <div id="mainDashboard" class="main-app hidden">
+        
+        <div class="sidebar">
+            <div class="sidebar-brand">📊 النظام المحاسبي المتكامل</div>
+            <ul class="sidebar-menu">
+                <li id="menuDash" class="active"><a onclick="switchTab('dash')">🏠 لوحة التحكم الرئيسية</a></li>
+                <li id="menuJournal"><a onclick="switchTab('journal')">📝 القيود اليومية</a></li>
+                <li id="menuSales"><a onclick="switchTab('sales')">🛒  المبيعات </a></li>
+                <li id="menuPurchases"><a onclick="switchTab('purchases')">📦  المشتريات</a></li>
+                <li id="menuReports"><a onclick="switchTab('reports')" style="color: #f1c40f; font-weight: bold;">📉 التقارير وميزان المراجعة</a></li>
+            </ul>
+            <a class="sidebar-logout" onclick="logout()">⚙️ تسجيل الخروج</a>
+        </div>
+
+        <div class="content-area">
+            
+            <div class="top-navbar">
+                <div>
+                    <h2 id="pageTitle" style="margin:0; font-size: 20px; font-weight: 700;">لوحة التحكم الرئيسية</h2>
+                    <span style="color:#7f8c8d; font-size:13px;">مرحباً <b id="lblUser">يزن يونس</b>، إليك نظرة على الأداء المالي.</span>
+                </div>
+                <div class="user-info">
+                    <div id="userAvatar" class="user-avatar">--</div>
+                    <div>
+                        <div style="font-weight: bold; font-size:14px;">يزن يونس</div>
+                        <div style="font-size: 11px; color:#95a5a6;">مدير النظام</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tabDash">
+                <div class="metrics-grid-row">
+                    <div id="cardProfitWrapper" class="stat-card-m card-profit">
+                        <h4>صافي الأرباح / الخسائر</h4>
+                        <div id="lblNetProfit" class="amount" style="color: var(--accent-green);">0.00 ل.س</div>
+                        <div class="subtext">إجمالي الإيرادات - إجمالي المصروفات</div>
+                    </div>
+                    <div class="stat-card-m card-assets">
+                        <h4>إجمالي الأصول (الموجودات)</h4>
+                        <div id="lblTotalAssets" class="amount" style="color: var(--accent-blue);">0.00 ل.س</div>
+                        <div class="subtext">النقدية + البنوك + الفئة [1]</div>
+                    </div>
+                    <div class="stat-card-m card-liabilities">
+                        <h4>إجمالي الالتزامات (الخصوم)</h4>
+                        <div id="lblTotalLiabilities" class="amount" style="color: var(--accent-orange);">0.00 ل.س</div>
+                        <div class="subtext">ديون الموردين والتجار فئة [2]</div>
+                    </div>
+                    <div class="stat-card-m card-equity">
+                        <h4>حقوق الملكية</h4>
+                        <div id="lblTotalEquity" class="amount" style="color: var(--accent-purple);">0.00 ل.س</div>
+                        <div class="subtext">المعادلة: الأصول - الالتزامات</div>
+                    </div>
+                </div>
+
+                <div class="rates-grid-row">
+                    <div class="stat-card-m" style="border-top: 4px solid var(--accent-green);">
+                        <button class="btn-rate-edit" onclick="updateUsdRate()">✏️ تعديل</button>
+                        <h4 style="font-size: 12px;">سعر الدولار الأمريكي (USD) بالسوق الموازي</h4>
+                        <div id="lblUsdRate" class="amount" style="font-size: 20px; color: var(--accent-green);">15,000.00 ل.س</div>
+                    </div>
+                    <div class="stat-card-m" style="border-top: 4px solid var(--accent-purple);">
+                        <button class="btn-rate-edit" onclick="updateEurRate()">✏️ تعديل</button>
+                        <h4 style="font-size: 12px;">سعر اليورو الأوروبي (EUR) بالسوق الموازي</h4>
+                        <div id="lblEurRate" class="amount" style="font-size: 20px; color: var(--accent-purple);">16,200.00 ل.س</div>
+                    </div>
+                </div>
+
+                <div class="panel" style="background: #f8fafc; border-right: 5px solid var(--accent-blue);">
+                    <div class="panel-header" style="border:none; margin:0; padding:0; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <h4 style="font-size:14px; color:var(--sidebar-color);">🗄️ إدارة أمن البيانات والنسخ الاحتياطي للنظام</h4>
+                            <p style="font-size:11px; color:#7f8c8d;">قم بحفظ نسخة كاملة من قيودك وحساباتك على جهازك واستعادتها في أي وقت لحماية عملك.</p>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn btn-edit" onclick="downloadSystemBackup()">📥 Download System Backup</button>
+                            <button class="btn btn-secondary" onclick="document.getElementById('backupFileInput').click()">📤 Restore Backup</button>
+                            <input type="file" id="backupFileInput" class="hidden" accept=".json" onchange="restoreSystemBackup(event)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>📁 دليل شجرة الحسابات (Chart of Accounts)</h3>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-success" onclick="openCreateAccountModal()">➕ إضافة حساب جديد</button>
+                            <button class="btn btn-danger" onclick="resetAllData()">⚠️ تصفير النظام</button>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>كود الحساب</th>
+                                <th>اسم الحساب</th>
+                                <th>التصنيف المالي</th>
+                                <th style="text-align: center; width: 150px;">التحكم</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accountsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tabJournal" class="hidden">
+                <div class="journal-top-bar">
+                    <div class="journal-type-selector-group">
+                        <button id="jTabExpense" class="journal-tab-btn active-jtab" onclick="switchJournalCategory('expense')">🧾 قيد صرف</button>
+                        <button id="jTabReceive" class="journal-tab-btn" onclick="switchJournalCategory('receive')">💰 قيد قبض</button>
+                        <button id="jTabJournal" class="journal-tab-btn" onclick="switchJournalCategory('journal')">🔄 سند قيد عام</button>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <input type="date" id="journalSearchDate" class="form-control" style="width: 160px;" onchange="filterJournalBySpecificDate()">
+                        <button class="btn btn-success" style="padding: 10px 20px; font-size: 13px;" onclick="startFullscreenWizard()">➕ إنشاء قيد جديد</button>
+                    </div>
+                </div>
+
+                <div class="panel" style="border-top: 4px solid var(--sidebar-color);">
+                    <div class="panel-header">
+                        <h3 id="lblJournalTableTitle">🗂️ قائمة القيود السابقة المسجلة</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 10%;">رقم القيد</th>
+                                <th style="width: 15%;">التاريخ</th>
+                                <th style="width: 15%;">الفرع</th>
+                                <th style="width: 45%;">شرح القيد والبيان</th>
+                                <th style="width: 15%; text-align: center;">معاينة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="newJournalTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tabSales" class="hidden">
+                <div class="panel" style="border-top: 5px solid var(--accent-green);">
+                    <div class="panel-header">
+                        <h3>🛒 نقطة بيع وإصدار الفواتير السريعة</h3>
+                    </div>
+                    <div class="report-filter-bar" style="grid-template-columns: 1fr 1fr 1fr 1fr auto; gap:10px;">
+                        <div>
+                            <label style="font-size:12px; font-weight:bold;">نوع المبيعات:</label>
+                            <select id="salesTypeSelector" class="form-control" onchange="toggleSalesCustomerSelect()">
+                                <option value="cash">💵 مبيعات نقدية (كاش)</option>
+                                <option value="credit">👥 مبيعات آجل (على الذمة)</option>
+                            </select>
+                        </div>
+                        <div id="salesCustomerDiv" class="hidden">
+                            <label style="font-size:12px; font-weight:bold;">اختر حساب العميل/الزبون:</label>
+                            <select id="salesCustomerSelector" class="form-control"></select>
+                        </div>
+                        <div>
+                            <label style="font-size:12px; font-weight:bold;">العملة:</label>
+                            <select id="salesCurrencySelector" class="form-control" onchange="calculateSalesTotal()">
+                                <option value="local">🇸🇾 العملة المحلية (ل.س)</option>
+                                <option value="usd">💵 الدولار الأمريكي ($)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:12px; font-weight:bold;">تاريخ الفاتورة:</label>
+                            <input type="date" id="salesInvoiceDate" class="form-control">
+                        </div>
+                    </div>
+
+                    <div style="background: #fafbfc; padding: 15px; border-radius: 8px; border: 1px solid #eaedf1; margin-bottom: 20px;">
+                        <h4 style="font-size:13px; margin-bottom:10px; color:var(--sidebar-color);">📝 تفاصيل المواد المباعة:</h4>
+                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <input type="text" id="saleItemName" class="form-control" placeholder="اسم المادة / الخدمة">
+                            <input type="number" id="saleItemQty" class="form-control" placeholder="الكمية" value="1" oninput="calculateSalesTotal()">
+                            <input type="number" id="saleItemPrice" class="form-control" placeholder="السعر الإفرادي" oninput="calculateSalesTotal()">
+                            <div style="display:flex; align-items:center; justify-content:center; background:white; border:1px solid #ddd; border-radius:5px; font-weight:bold; font-size:15px; color:var(--accent-blue);" id="lblSaleTotalRow">0.00</div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#edf7ff; padding:15px; border-radius:8px; margin-bottom:20px;">
+                        <div>
+                            <span style="font-size:12px; font-weight:bold; color:#7f8c8d; display:block;">المبلغ النهائي المسجل بالدفاتر (ل.س):</span>
+                            <b id="lblSalesFinalBooked" style="font-size:24px; color:var(--sidebar-color);">0.00 ل.س</b>
+                        </div>
+                        <button class="btn btn-success" style="padding:12px 30px; font-size:14px;" onclick="processSalesInvoice()">💾 حفظ وترحيل الفاتورة للدفاتر</button>
+                    </div>
+
+                    <div class="panel-header" style="margin-top:30px;">
+                        <h3>📋 أرشيف فواتير المبيعات الصادرة</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr style="background:#fafbfc;">
+                                <th>رقم الفاتورة</th>
+                                <th>التاريخ</th>
+                                <th>حساب العميل</th>
+                                <th>طريقة الدفع</th>
+                                <th>القيمة بالعملة الأصلية</th>
+                                <th>القيمة الدفترية المعززة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesArchiveTableBody">
+                            <tr><td colspan="6" style="text-align:center; padding:15px; color:#95a5a6;">لا يوجد فواتير مبيعات مسجلة حتى الآن.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tabPurchases" class="hidden">
+                <div class="panel" style="border-top: 5px solid var(--accent-orange);">
+                    <div class="panel-header">
+                        <h3>📦 إدارة وتدون فواتير المشتريات المباشرة</h3>
+                    </div>
+                    <div class="report-filter-bar" style="grid-template-columns: 1fr 1fr 1fr 1fr auto; gap:10px;">
+                        <div>
+                            <label style="font-size:12px; font-weight:bold;">نوع عملية الشراء:</label>
+                            <select id="pureTypeSelector" class="form-control" onchange="togglePureVendorSelect()">
+                                <option value="cash">💵 مشتريات نقدية (من الصندوق الرئيسي)</option>
+                                <option value="credit">👥 مشتريات آجل (على حساب الذمم)</option>
+                            </select>
+                        </div>
+                        <div id="pureVendorDiv">
+                            <label style="font-size:12px; font-weight:bold;">اختر حساب المورد/التاجر:</label>
+                            <select id="pureVendorSelector" class="form-control"></select>
+                        </div>
+                        <div>
+                            <label style="font-size:12px; font-weight:bold;">العملة المستخدمة:</label>
+                            <select id="pureCurrencySelector" class="form-control" onchange="calculatePureTotal()">
+                                <option value="local">🇸🇾 العملة المحلية (ل.س)</option>
+                                <option value="usd">💵 الدولار الأمريكي ($)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:12px; font-weight:bold;">تاريخ الفاتورة:</label>
+                            <input type="date" id="pureInvoiceDate" class="form-control">
+                        </div>
+                    </div>
+
+                    <div style="background: #fafbfc; padding: 15px; border-radius: 8px; border: 1px solid #eaedf1; margin-bottom: 20px;">
+                        <h4 style="font-size:13px; margin-bottom:10px; color:var(--accent-orange);">📝 تفاصيل المواد المشتراة والمصاريف المعززة:</h4>
+                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <input type="text" id="pureItemName" class="form-control" placeholder="اسم المادة / البضاعة المشتراة">
+                            <input type="number" id="pureItemQty" class="form-control" placeholder="الكمية" value="1" oninput="calculatePureTotal()">
+                            <input type="number" id="pureItemPrice" class="form-control" placeholder="السعر الإفرادي" oninput="calculatePureTotal()">
+                            <div style="display:flex; align-items:center; justify-content:center; background:white; border:1px solid #ddd; border-radius:5px; font-weight:bold; font-size:15px; color:var(--accent-orange);" id="lblPureTotalRow">0.00</div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#fff2e6; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #ffd8b3;">
+                        <div>
+                            <span style="font-size:12px; font-weight:bold; color:#7f8c8d; display:block;">إجمالي التكلفة الدفترية المضافة لحساب المشتريات (ل.س):</span>
+                            <b id="lblPureFinalBooked" style="font-size:24px; color:var(--accent-orange);">0.00 ل.س</b>
+                        </div>
+                        <button class="btn btn-warning" style="padding:12px 30px; font-size:14px; background-color:var(--accent-orange); color:white;" onclick="processPureInvoice()">💾 حفظ وترحيل فاتورة المشتريات</button>
+                    </div>
+
+                    <div class="panel-header" style="margin-top:30px;">
+                        <h3>📋 أرشيف فواتير المشتريات الصادرة والمسجلة</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr style="background:#fafbfc;">
+                                <th>رقم الفاتورة</th>
+                                <th>التاريخ</th>
+                                <th>الطرف المستحق</th>
+                                <th>طريقة الدفع</th>
+                                <th>القيمة بالعملة الأصلية</th>
+                                <th>التكلفة الدفترية (ل.س)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pureArchiveTableBody">
+                            <tr><td colspan="6" style="text-align:center; padding:15px; color:#95a5a6;">لا يوجد فواتير مشتريات مسجلة حتى الآن.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tabReports" class="hidden">
+                <div class="report-tabs-header">
+                    <button id="repTriggerSub1" class="report-tab-trigger active-rep-tab" onclick="switchReportSubView('ledger')">📊 كشف حساب تفصيلي</button>
+                    <button id="repTriggerSub2" class="report-tab-trigger" onclick="switchReportSubView('trial')">⚖️ ميزان المراجعة العام</button>
+                    <button id="repTriggerSub3" class="report-tab-trigger" onclick="switchReportSubView('crm')">👥 أرصدة الزبائن والموردين</button>
+                    <button id="repTriggerSub4" class="report-tab-trigger" onclick="switchReportSubView('malk')">👥 الميزانية العمومية</button>
+                </div>
+
+                <div id="subViewLedger">
+                    <div class="panel" style="border-top: 5px solid var(--accent-purple);">
+                        <div class="panel-header">
+                            <h3>📈 محرك استخراج التقارير وكشوف الحسابات التفصيلية</h3>
+                            <div id="reportActionButtons" class="hidden" style="display: flex; gap: 8px;">
+                                <button class="btn btn-secondary" onclick="printReportData()">🖨️ Print Report</button>
+                                <button class="btn btn-edit" style="background-color: #27ae60;" onclick="exportReportToExcel()">📊 Export to Excel</button>
+                            </div>
+                        </div>
+                        <div class="report-filter-bar">
+                            <div>
+                                <label style="font-size:11px; font-weight:bold;">الحساب المالي:</label>
+                                <select id="reportAccSelector" class="form-control"></select>
+                            </div>
+                            <div>
+                                <label style="font-size:11px; font-weight:bold;">تصفية حسب الفرع:</label>
+                                <select id="reportBranchSelector" class="form-control">
+                                    <option value="all">🌍 كل الفروع والعمليات</option>
+                                    <option value="فرع رئيسي">فرع رئيسي</option>
+                                    <option value="حماه">حماه</option>
+                                    <option value="حلب">حلب</option>
+                                    <option value="حمص">حمص</option>
+                                    <option value="درعا">درعا</option>
+                                    <option value="لاذقية">لاذقية</option>
+                                    <option value="طرطوس">طرطوس</option>
+                                    <option value="حسكة">حسكة</option>
+                                    <option value="دير الزور">دير الزور</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size:11px; font-weight:bold;">من تاريخ:</label>
+                                <input type="date" id="reportDateFrom" class="form-control">
+                            </div>
+                            <div>
+                                <label style="font-size:11px; font-weight:bold;">إلى تاريخ:</label>
+                                <input type="date" id="reportDateTo" class="form-control">
+                            </div>
+                            <button class="btn btn-success" style="padding:10px 20px;" onclick="generateReport()">🔍 عرض التقرير</button>
+                        </div>
+                        <div class="report-summary-boxes">
+                            <div class="summary-mini"><span>إجمالي المدين (منه)</span><b id="repTotalDebit">0.00</b></div>
+                            <div class="summary-mini"><span>إجمالي الدائن (له)</span><b id="repTotalCredit">0.00</b></div>
+                            <div class="summary-mini" style="background:#edf7ff"><span>الرصيد النهائي الحالي</span><b id="repFinalBalance" style="color:var(--accent-blue)">0.00</b></div>
+                        </div>
+                        <table id="printableReportTable">
+                            <thead>
+                                <tr style="background:#f1f2f6;">
+                                    <th style="width:10%">رقم القيد</th>
+                                    <th style="width:12%">التاريخ</th>
+                                    <th style="width:15%">الفرع</th>
+                                    <th style="width:13%">النوع</th>
+                                    <th style="width:30%">شرح الحركة والبيان</th>
+                                    <th style="width:10%">مدين</th>
+                                    <th style="width:10%">دائن</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportTableBody">
+                                <tr><td colspan="7" style="text-align:center; padding:30px; color:#95a5a6;">يرجى اختيار الحساب والفترة الزمنية ثم الضغط على عرض التقرير</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="subViewTrial" class="hidden">
+                    <div class="panel" style="border-top: 5px solid var(--sidebar-color);">
+                        <div class="panel-header">
+                            <h3>⚖️ ميزان المراجعة لجميع حسابات الشجرة المفتوحة</h3>
+                            <button class="btn btn-edit" style="background-color:#2980b9;" onclick="exportTrialToExcel()">📊 Export Trial to Excel</button>
+                        </div>
+                        <div style="background:#f1f9ff; padding:12px; border-radius:6px; margin-bottom:15px; font-size:13px; font-weight:bold; color:var(--sidebar-color);" id="lblTrialBalanceStatus">
+                            ميزان المراجعة قيد الاحتساب الفوري...
+                        </div>
+                        <table>
+                            <thead>
+                                <tr style="background:#fafbfc;">
+                                    <th>كود الحساب</th>
+                                    <th>اسم الحساب المالي</th>
+                                    <th>مجموع الحركات مدين</th>
+                                    <th>مجموع الحركات دائن</th>
+                                    <th>صافي الرصيد الحالي</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trialTableBody"></tbody>
+                            <tfoot>
+                                <tr style="background:#edf2f7; font-weight:bold; border-top:2px solid #cbd5e1;">
+                                    <td colspan="2">المجاميع الكلية للحسابات:</td>
+                                    <td id="lblTrialTotalDebit" style="color:var(--accent-green);">0.00</td>
+                                    <td id="lblTrialTotalCredit" style="color:var(--accent-red);">0.00</td>
+                                    <td id="lblTrialDiff" style="color:var(--sidebar-color);">0.00</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="subViewCrm" class="hidden">
+                    <div class="panel" style="border-top: 5px solid var(--accent-orange);">
+                        <div class="panel-header">
+                            <h3>👥 كشف أرصدة الزبائن والموردين والتجار المعلقة</h3>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr style="background:#fafbfc;">
+                                    <th>كود الحساب</th>
+                                    <th>الاسم / الكيان التجاري</th>
+                                    <th>التصنيف الدليلي</th>
+                                    <th>طبيعة الرصيد</th>
+                                    <th>الرصيد المعلق الحالي (ل.س)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="crmTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="subViewBalance" class="hidden">
+                    <div class="panel" style="border-top: 5px solid #2c3e50;">
+                        <div class="panel-header">
+                            <h3>🏛️ الميزانية العمومية</h3>
+                        </div>
+                        <div id="reportOutput">
+                            <p style="padding: 20px; color: #95a5a6;">اضغط على تبويب الميزانية العمومية لعرض النتائج.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div id="wizardStep1" class="fullscreen-wizard hidden">
+        <div class="wizard-container">
+            <div class="wizard-header">
+                <h2>✍️ إنشاء قيد جديد - الخطوة الأولى</h2>
+                <span id="lblWizBadge" class="badge-type-indicator" style="background:var(--accent-blue); padding:6px 15px; font-size:14px;">قيد صرف</span>
+            </div>
+            
+            <div class="wizard-grid-2">
+                <div>
+                    <label style="font-weight:bold; display:block; margin-bottom:5px;">تاريخ حفظ القيد:</label>
+                    <input type="date" id="wizDate" class="form-control">
+                </div>
+                <div>
+                    <label style="font-weight:bold; display:block; margin-bottom:5px;">اختر الفرع المسؤول عن الحركة:</label>
+                    <select id="wizBranch" class="form-control">
+                        <option value="فرع رئيسي">فرع رئيسي</option>
+                        <option value="حماه">حماه</option>
+                        <option value="حلب">حلب</option>
+                        <option value="حمص">حمص</option>
+                        <option value="درعا">درعا</option>
+                        <option value="لاذقية">لاذقية</option>
+                        <option value="طرطوس">طرطوس</option>
+                        <option value="حسكة">حسكة</option>
+                        <option value="دير الزور">دير الزور</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="wizard-grid-2" style="margin-top:25px;">
+                <div>
+                    <label style="font-weight:bold; display:block; margin-bottom:5px; color:var(--accent-green);">شرح القيد للطرف المدين:</label>
+                    <textarea id="wizDescDebit" class="form-control" rows="4" placeholder="اكتب تفاصيل حركة الطرف المدين هنا..." style="resize:none; font-family:inherit;"></textarea>
+                </div>
+                <div>
+                    <label style="font-weight:bold; display:block; margin-bottom:5px; color:var(--accent-orange);">شرح القيد للطرف الدائن:</label>
+                    <textarea id="wizDescCredit" class="form-control" rows="4" placeholder="اكتب تفاصيل حركة الطرف الدائن هنا..." style="resize:none; font-family:inherit;"></textarea>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:15px; margin-top:30px; background:#fafbfc; padding:15px; border-radius:8px;">
+                <button class="btn btn-danger" style="padding:10px 25px;" onclick="closeWizard()">❌ إلغاء التراجع</button>
+                <button class="btn btn-success" style="padding:10px 30px; background:var(--sidebar-color);" onclick="goToWizardStep2()">التالي ➡️</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="wizardStep2" class="fullscreen-wizard hidden">
+        <div class="wizard-container" style="border-top-color: var(--accent-green);">
+            <div class="wizard-header">
+                <h2>🎯 التوجيه المحاسبي المالي - الخطوة الثانية</h2>
+                <span id="lblWizBadge2" class="badge-type-indicator" style="background:var(--accent-blue); padding:6px 15px; font-size:14px;">قيد صرف</span>
+            </div>
+
+            <div style="background:#f8fafd; padding:15px; border-radius:8px; margin-bottom:25px; border:1px dashed #cbd5e1; font-size:13.5px;">
+                <b>ملخص البيانات الأساسية للتحقق:</b>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:8px;">
+                    <div>📅 التاريخ المعتمد: <span id="lblSummaryDate" style="font-weight:bold;">-</span></div>
+                    <div>🏢 الفرع المحدد: <span id="lblSummaryBranch" style="font-weight:bold; color:var(--accent-blue);">-</span></div>
+                </div>
+            </div>
+
+            <table style="margin-bottom:25px;">
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">الحساب المالي المتأثر (ابتدئ بكتابة الكود للبحث المباشر)</th>
+                        <th style="width: 50%;">المبلغ المالي المعتمد للطرفين</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <label style="font-size:11px; font-weight:bold; color:var(--accent-green); display:block; margin-bottom:3px;">الحساب المدين (منه):</label>
+                            <select id="wizAccDebit" class="form-control" onchange="validateWizardFinancials()"></select>
+                            <div id="lblSummaryDescDebit" style="font-size:11px; color:#7f8c8d; margin-top:4px; font-style:italic;"></div>
+                        </td>
+                        <td>
+                            <label style="font-size:11px; font-weight:bold; display:block; margin-bottom:3px;">مبلغ الطرف المدين:</label>
+                            <input type="number" id="wizValDebit" class="form-control" value="0" oninput="validateWizardFinancials()">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label style="font-size:11px; font-weight:bold; color:var(--accent-orange); display:block; margin-bottom:3px;">الحساب الدائن (إليه):</label>
+                            <select id="wizAccCredit" class="form-control" onchange="validateWizardFinancials()"></select>
+                            <div id="lblSummaryDescCredit" style="font-size:11px; color:#7f8c8d; margin-top:4px; font-style:italic;"></div>
+                        </td>
+                        <td>
+                            <label style="font-size:11px; font-weight:bold; display:block; margin-bottom:3px;">مبلغ الطرف الدائن:</label>
+                            <input type="number" id="wizValCredit" class="form-control" value="0" oninput="validateWizardFinancials()">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                <div id="wizFormStatus" style="font-size:13px; font-weight:bold; color:var(--accent-red)">❌ القيد غير متوازن مالياً</div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn btn-warning" onclick="backToWizardStep1()">⬅️ السابق تعديل الشرح</button>
+                    <button id="btnWizSave" class="btn btn-success" disabled onclick="finalizeAndSaveWizardEntry()">💾 ترحيل وحفظ نهائي</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="accountModal" class="modal hidden">
+        <div class="modal-content" style="border-top: 5px solid var(--accent-green); width: 450px;">
+            <h3>➕ إضافة حساب مالي جديد لشجرة الحسابات</h3>
+            <div style="margin: 15px 0; text-align: right;">
+                <label style="font-size: 12px; font-weight: bold;">كود الحساب (يفضل 4 أرقام):</label>
+                <input type="number" id="newAccCode" class="form-control" placeholder="مثال: 1003 أو 5002">
+            </div>
+            <div style="margin: 15px 0; text-align: right;">
+                <label style="font-size: 12px; font-weight: bold;">اسم الحساب / العميل:</label>
+                <input type="text" id="newAccName" class="form-control" placeholder="أدخل اسم الحساب التفصيلي">
+            </div>
+            <div style="margin: 15px 0; text-align: right;">
+                <label style="font-size: 12px; font-weight: bold;">التصنيف المالي الرئيسي:</label>
+                <select id="newAccCat" class="form-control">
+                    <option value="الأصول">الأصول (تبدأ بـ 1)</option>
+                    <option value="الخصوم">الخصوم (تبدأ بـ 2)</option>
+                    <option value="حقوق الملكية">حقوق الملكية (تبدأ بـ 3)</option>
+                    <option value="الإيرادات">الإيرادات (تبدأ بـ 4)</option>
+                    <option value="المصروفات">المصروفات (تبدأ بـ 5)</option>
+                    <option value="الزبائن">الزبائن (تبدأ بـ 6)</option>
+                </select>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; background: #f8f9fa; padding: 12px; border-radius: 6px;">
+                <button class="btn btn-danger" onclick="closeCreateAccountModal()">إلغاء ❌</button>
+                <button class="btn btn-success" onclick="saveNewAccountInTree()">💾 حفظ الحساب</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editEntryModal" class="modal hidden">
+        <div class="modal-content" style="border-top: 5px solid var(--accent-blue);">
+            <h3>🔍 مراجعة وتعديل بيانات القيد المالي</h3>
+            <input type="hidden" id="editEntryId">
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px; margin: 15px 0;">
+                <input type="date" id="editEntryDate" class="form-control">
+                <input type="text" id="editEntryDesc" class="form-control">
+            </div>
+            <table style="margin-bottom:15px">
+                <tr><td><b>الطرف المدين:</b> <span id="lblEditDebitName" style="color:var(--accent-green);"></span></td><td><input type="number" id="editValDebit" class="form-control" oninput="validateEditForm()"></td></tr>
+                <tr><td><b>الطرف الدائن:</b> <span id="lblEditCreditName" style="color:var(--accent-orange);"></span></td><td><input type="number" id="editValCredit" class="form-control" oninput="validateEditForm()"></td></tr>
+            </table>
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 12px; border-radius: 6px;">
+                <div id="editFormStatus" style="font-size:12.5px; font-weight:bold; color:var(--accent-green)">✅ القيد متوازن وصحيح</div>
+                <div>
+                    <button class="btn btn-danger" onclick="closeEditModal()">إلغاء ❌</button>
+                    <button id="btnSaveEditedEntry" class="btn btn-edit" onclick="saveEditedEntry()">💾 حفظ التعديلات</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script src="./script.js"></script>
+</body>
+</html>
